@@ -8,7 +8,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'WatchFlow - Never Miss Important Posts',
+  title: 'Watcher - Never Miss Important Posts',
   description: 'Automated post monitoring for jobs, shopping deals, real estate, stocks, social media, and news. Get instant alerts when new posts match your criteria.',
   generator: 'v0.app',
   icons: {

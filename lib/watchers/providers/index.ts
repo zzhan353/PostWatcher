@@ -5,6 +5,7 @@ import { createSerpApiGoogleJobsProvider } from "./jobs/serpapi-google-jobs"
 import { createSerpApiGoogleShoppingProvider } from "./shopping/serpapi-google-shopping"
 import { createSerpApiGoogleNewsProvider } from "./news/serpapi-google-news"
 import { createFinnhubStocksProvider } from "./stocks/finnhub-stocks"
+import { createRedditProvider } from "./social/reddit"
 
 export interface ProviderRunResult {
   source: string
@@ -53,6 +54,7 @@ export const providers: Provider[] = [
   createSerpApiGoogleShoppingProvider(),
   createSerpApiGoogleNewsProvider(),
   createFinnhubStocksProvider(),
+  createRedditProvider(),
   createRemotiveProvider(),
   createRemoteOkProvider(),
   createArbeitnowProvider(),
@@ -60,4 +62,7 @@ export const providers: Provider[] = [
   createUnconfiguredProvider("indeed", "Indeed"),
   createUnconfiguredProvider("zillow", "Zillow"),
   createUnconfiguredProvider("redfin", "Redfin"),
+  createUnconfiguredProvider("twitter_x", "Twitter/X"),
+  createUnconfiguredProvider("facebook", "Facebook"),
+  createUnconfiguredProvider("instagram", "Instagram"),
 ]

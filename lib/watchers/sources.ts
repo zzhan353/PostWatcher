@@ -9,6 +9,7 @@ export const watcherSources: WatcherSourceMeta[] = [
   { id: "serpapi_google_shopping", label: "Google Shopping (SerpApi)", requiresApi: true },
   { id: "serpapi_google_news", label: "Google News (SerpApi)", requiresApi: true },
   { id: "finnhub_stocks", label: "Finnhub Stocks", requiresApi: true },
+  { id: "reddit", label: "Reddit", requiresApi: false },
   { id: "remotive", label: "Remotive", requiresApi: false },
   { id: "remoteok", label: "Remote OK", requiresApi: false },
   { id: "arbeitnow", label: "Arbeitnow", requiresApi: false },
@@ -16,6 +17,9 @@ export const watcherSources: WatcherSourceMeta[] = [
   { id: "indeed", label: "Indeed", requiresApi: true },
   { id: "zillow", label: "Zillow", requiresApi: true },
   { id: "redfin", label: "Redfin", requiresApi: true },
+  { id: "twitter_x", label: "Twitter/X", requiresApi: true },
+  { id: "facebook", label: "Facebook", requiresApi: true },
+  { id: "instagram", label: "Instagram", requiresApi: true },
 ]
 
 export function getWatcherSource(id: string) {

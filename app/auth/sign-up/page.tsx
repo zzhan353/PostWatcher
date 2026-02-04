@@ -64,7 +64,7 @@ export default function SignUpPage() {
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <Radar className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-foreground">WatchFlow</span>
+              <span className="text-xl font-bold text-foreground">Watcher</span>
             </Link>
           </div>
           <CardTitle className="text-2xl text-center">Create an account</CardTitle>

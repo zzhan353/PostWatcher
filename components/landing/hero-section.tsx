@@ -20,7 +20,7 @@ export function HeroSection() {
           </h1>
           
           <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            WatchFlow monitors jobs, deals, real estate, stocks, news, and social media for you. 
+            Watcher monitors jobs, deals, real estate, stocks, news, and social media for you. 
             Get instant alerts when posts match your criteria.
           </p>
           

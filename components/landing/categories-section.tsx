@@ -48,7 +48,7 @@ export function CategoriesSection() {
             Watch Any Type of Post
           </h2>
           <p className="mt-4 text-pretty text-lg text-muted-foreground">
-            From job hunting to deal hunting, WatchFlow has you covered across all major categories.
+            From job hunting to deal hunting, Watcher has you covered across all major categories.
           </p>
         </div>
         

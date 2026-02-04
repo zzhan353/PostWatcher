@@ -22,7 +22,7 @@ export async function createCheckoutSession(productId: string) {
         price_data: {
           currency: "usd",
           product_data: {
-            name: `WatchFlow ${product.name}`,
+            name: `Watcher ${product.name}`,
             description: product.description,
           },
           unit_amount: product.priceInCents,

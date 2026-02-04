@@ -28,7 +28,7 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Eye className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">WatchFlow</span>
+              <span className="text-lg font-semibold">Watcher</span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
               Automated post monitoring for the modern web. Never miss an opportunity again.
@@ -86,7 +86,7 @@ export function Footer() {
         
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} WatchFlow. All rights reserved.
+            &copy; {new Date().getFullYear()} Watcher. All rights reserved.
           </p>
         </div>
       </div>
