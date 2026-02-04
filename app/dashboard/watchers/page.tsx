@@ -2,36 +2,9 @@ import React from "react"
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  Briefcase,
-  ShoppingCart,
-  Home,
-  TrendingUp,
-  MessageSquare,
-  Newspaper,
-  Eye,
-} from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import Link from "next/link";
 import { WatcherCard } from "@/components/dashboard/watcher-card";
-
-const categoryIcons: Record<string, React.ElementType> = {
-  jobs: Briefcase,
-  shopping: ShoppingCart,
-  real_estate: Home,
-  stocks: TrendingUp,
-  social: MessageSquare,
-  news: Newspaper,
-};
-
-const categoryColors: Record<string, string> = {
-  jobs: "text-blue-500 bg-blue-500/10",
-  shopping: "text-green-500 bg-green-500/10",
-  real_estate: "text-orange-500 bg-orange-500/10",
-  stocks: "text-purple-500 bg-purple-500/10",
-  social: "text-pink-500 bg-pink-500/10",
-  news: "text-cyan-500 bg-cyan-500/10",
-};
 
 interface SearchParams {
   category?: string;
@@ -91,11 +64,6 @@ export default async function WatchersPage({
             <WatcherCard
               key={watcher.id}
               watcher={watcher}
-              icon={categoryIcons[watcher.category] || Eye}
-              colorClass={
-                categoryColors[watcher.category] ||
-                "text-muted-foreground bg-muted"
-              }
             />
           ))}
         </div>

@@ -5,6 +5,7 @@ create table if not exists public.profiles (
   full_name text,
   subscription_tier text default 'free' check (subscription_tier in ('free', 'pro', 'enterprise')),
   stripe_customer_id text,
+  last_digest_sent_at timestamp with time zone,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );
@@ -22,9 +23,11 @@ create table if not exists public.watchers (
   name text not null,
   category text not null check (category in ('jobs', 'shopping', 'real_estate', 'stocks', 'social_media', 'news')),
   keywords text[] default '{}',
+  source_url text,
   filters jsonb default '{}',
   notification_email boolean default true,
   notification_push boolean default false,
+  notification_interval_minutes integer default 1440,
   is_active boolean default true,
   last_checked_at timestamp with time zone,
   created_at timestamp with time zone default now(),

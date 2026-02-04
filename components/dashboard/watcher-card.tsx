@@ -11,7 +11,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Briefcase,
+  ShoppingCart,
+  Home,
+  TrendingUp,
+  Share2,
+  Newspaper,
+  Eye,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,14 +40,33 @@ interface Watcher {
 
 interface WatcherCardProps {
   watcher: Watcher;
-  icon: React.ElementType;
-  colorClass: string;
 }
 
-export function WatcherCard({ watcher, icon: Icon, colorClass }: WatcherCardProps) {
+const categoryIcons: Record<string, React.ElementType> = {
+  jobs: Briefcase,
+  shopping: ShoppingCart,
+  real_estate: Home,
+  stocks: TrendingUp,
+  social_media: Share2,
+  news: Newspaper,
+};
+
+const categoryColors: Record<string, string> = {
+  jobs: "text-blue-500 bg-blue-500/10",
+  shopping: "text-green-500 bg-green-500/10",
+  real_estate: "text-orange-500 bg-orange-500/10",
+  stocks: "text-purple-500 bg-purple-500/10",
+  social_media: "text-pink-500 bg-pink-500/10",
+  news: "text-cyan-500 bg-cyan-500/10",
+};
+
+export function WatcherCard({ watcher }: WatcherCardProps) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(watcher.is_active);
   const [isUpdating, setIsUpdating] = useState(false);
+  const Icon = categoryIcons[watcher.category] || Eye;
+  const colorClass =
+    categoryColors[watcher.category] || "text-muted-foreground bg-muted";
 
   const toggleActive = async () => {
     setIsUpdating(true);
@@ -85,7 +115,7 @@ export function WatcherCard({ watcher, icon: Icon, colorClass }: WatcherCardProp
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/watchers/${watcher.id}/edit`}>
+              <Link href={`/dashboard/watchers/${watcher.id}`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>

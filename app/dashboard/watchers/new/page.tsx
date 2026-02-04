@@ -30,8 +30,10 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import {
   createWatcher,
+  createWatcherFromPrompt,
   type WatcherCategory,
 } from "@/app/actions/watchers"
+import { Textarea } from "@/components/ui/textarea"
 
 const categories = [
   { id: "jobs", label: "Jobs", icon: Briefcase, description: "Track job postings" },
@@ -54,6 +56,9 @@ export default function NewWatcherPage() {
   const [sourceUrl, setSourceUrl] = useState("")
   const [notifyEmail, setNotifyEmail] = useState(true)
   const [notifySms, setNotifySms] = useState(false)
+  const [intervalDays, setIntervalDays] = useState(1)
+  const [usePrompt, setUsePrompt] = useState(false)
+  const [prompt, setPrompt] = useState("")
 
   function addKeyword() {
     const trimmed = keywordInput.trim()
@@ -80,17 +85,32 @@ export default function NewWatcherPage() {
     setError(null)
 
     try {
-      await createWatcher({
-        name,
-        category,
-        keywords,
-        sourceUrl: sourceUrl || undefined,
-        notifyEmail,
-        notifySms,
-      })
+      if (usePrompt && prompt.trim()) {
+        await createWatcherFromPrompt(prompt.trim(), {
+          notifyEmail,
+          notifySms,
+          sourceUrl: sourceUrl || undefined,
+          notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
+        })
+      } else {
+        await createWatcher({
+          name,
+          category,
+          keywords,
+          sourceUrl: sourceUrl || undefined,
+          notifyEmail,
+          notifySms,
+          notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
+        })
+      }
 
-      router.push("/dashboard/watchers")
+      router.replace("/dashboard/watchers")
       router.refresh()
+      setTimeout(() => {
+        if (window.location.pathname.includes("/dashboard/watchers/new")) {
+          window.location.assign("/dashboard/watchers")
+        }
+      }, 300)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -132,8 +152,33 @@ export default function NewWatcherPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  disabled={usePrompt}
                 />
               </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="usePrompt">Use description instead</Label>
+                  <Switch checked={usePrompt} onCheckedChange={setUsePrompt} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Let AI generate name, category, and keywords from a description
+                </p>
+              </div>
+
+              {usePrompt && (
+                <div className="grid gap-2">
+                  <Label htmlFor="prompt">Watcher Description</Label>
+                  <Textarea
+                    id="prompt"
+                    placeholder="e.g., Find senior React jobs in NYC paying over 160k, focus on remote-friendly roles."
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={4}
+                    required={usePrompt}
+                  />
+                </div>
+              )}
 
               <div className="grid gap-2">
                 <Label>Category</Label>
@@ -150,6 +195,7 @@ export default function NewWatcherPage() {
                             : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => setCategory(cat.id)}
+                        disabled={usePrompt}
                       >
                         <Icon className="w-6 h-6" />
                         <span className="font-medium text-sm">{cat.label}</span>
@@ -181,12 +227,18 @@ export default function NewWatcherPage() {
                     value={keywordInput}
                     onChange={(e) => setKeywordInput(e.target.value)}
                     onKeyDown={handleKeywordKeyDown}
+                    disabled={usePrompt}
                   />
-                  <Button type="button" variant="outline" onClick={addKeyword}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addKeyword}
+                    disabled={usePrompt}
+                  >
                     Add
                   </Button>
                 </div>
-                {keywords.length > 0 && (
+                {keywords.length > 0 && !usePrompt && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {keywords.map((keyword) => (
                       <Badge
@@ -235,6 +287,21 @@ export default function NewWatcherPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="intervalDays">Notification interval (days)</Label>
+                <Input
+                  id="intervalDays"
+                  type="number"
+                  min={1}
+                  value={intervalDays}
+                  onChange={(e) =>
+                    setIntervalDays(Math.max(1, Number(e.target.value) || 1))
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum once per day to save tokens
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Email Notifications</p>
@@ -274,7 +341,10 @@ export default function NewWatcherPage() {
             </Button>
             <Button
               type="submit"
-              disabled={loading || !name || keywords.length === 0}
+              disabled={
+                loading ||
+                (usePrompt ? !prompt.trim() : !name || keywords.length === 0)
+              }
             >
               {loading ? (
                 <>

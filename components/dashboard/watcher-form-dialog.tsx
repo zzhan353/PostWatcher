@@ -31,10 +31,12 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import {
   createWatcher,
+  createWatcherFromPrompt,
   updateWatcher,
   type WatcherCategory,
   type CreateWatcherInput,
 } from "@/app/actions/watchers"
+import { Textarea } from "@/components/ui/textarea"
 
 const categories = [
   { id: "jobs", label: "Jobs", icon: Briefcase },
@@ -53,8 +55,9 @@ interface WatcherFormDialogProps {
     category: WatcherCategory
     keywords: string[]
     source_url?: string | null
-    notify_email: boolean
-    notify_sms: boolean
+    notification_email: boolean
+    notification_push: boolean
+    notification_interval_minutes?: number | null
   }
   onSuccess?: () => void
 }
@@ -76,8 +79,20 @@ export function WatcherFormDialog({
   const [keywords, setKeywords] = useState<string[]>(watcher?.keywords || [])
   const [keywordInput, setKeywordInput] = useState("")
   const [sourceUrl, setSourceUrl] = useState(watcher?.source_url || "")
-  const [notifyEmail, setNotifyEmail] = useState(watcher?.notify_email ?? true)
-  const [notifySms, setNotifySms] = useState(watcher?.notify_sms ?? false)
+  const [notifyEmail, setNotifyEmail] = useState(
+    watcher?.notification_email ?? true
+  )
+  const [notifySms, setNotifySms] = useState(
+    watcher?.notification_push ?? false
+  )
+  const [intervalDays, setIntervalDays] = useState(
+    Math.max(
+      1,
+      Math.round((watcher?.notification_interval_minutes ?? 1440) / 1440),
+    ),
+  )
+  const [usePrompt, setUsePrompt] = useState(false)
+  const [prompt, setPrompt] = useState("")
 
   const isEditing = !!watcher
 
@@ -106,18 +121,34 @@ export function WatcherFormDialog({
     setError(null)
 
     try {
-      const input: CreateWatcherInput = {
-        name,
-        category,
-        keywords,
-        sourceUrl: sourceUrl || undefined,
-        notifyEmail,
-        notifySms,
-      }
-
       if (isEditing) {
+        const input: CreateWatcherInput = {
+          name,
+          category,
+          keywords,
+          sourceUrl: sourceUrl || undefined,
+          notifyEmail,
+          notifySms,
+          notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
+        }
         await updateWatcher({ id: watcher.id, ...input })
+      } else if (usePrompt && prompt.trim()) {
+        await createWatcherFromPrompt(prompt.trim(), {
+          notifyEmail,
+          notifySms,
+          sourceUrl: sourceUrl || undefined,
+          notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
+        })
       } else {
+        const input: CreateWatcherInput = {
+          name,
+          category,
+          keywords,
+          sourceUrl: sourceUrl || undefined,
+          notifyEmail,
+          notifySms,
+          notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
+        }
         await createWatcher(input)
       }
 
@@ -132,6 +163,9 @@ export function WatcherFormDialog({
         setSourceUrl("")
         setNotifyEmail(true)
         setNotifySms(false)
+        setIntervalDays(1)
+        setUsePrompt(false)
+        setPrompt("")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
@@ -175,6 +209,32 @@ export function WatcherFormDialog({
               />
             </div>
 
+            {!isEditing && (
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="usePrompt">Use description instead</Label>
+                  <Switch checked={usePrompt} onCheckedChange={setUsePrompt} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Let AI generate name, category, and keywords from a description
+                </p>
+              </div>
+            )}
+
+            {!isEditing && usePrompt && (
+              <div className="grid gap-2">
+                <Label htmlFor="prompt">Watcher Description</Label>
+                <Textarea
+                  id="prompt"
+                  placeholder="e.g., Find senior React jobs in NYC paying over 160k, focus on remote-friendly roles."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={4}
+                  required={usePrompt}
+                />
+              </div>
+            )}
+
             <div className="grid gap-2">
               <Label>Category</Label>
               <div className="grid grid-cols-3 gap-2">
@@ -187,6 +247,7 @@ export function WatcherFormDialog({
                       variant={category === cat.id ? "default" : "outline"}
                       className="flex flex-col items-center gap-1 h-auto py-3"
                       onClick={() => setCategory(cat.id)}
+                      disabled={usePrompt}
                     >
                       <Icon className="w-5 h-5" />
                       <span className="text-xs">{cat.label}</span>
@@ -205,12 +266,18 @@ export function WatcherFormDialog({
                   value={keywordInput}
                   onChange={(e) => setKeywordInput(e.target.value)}
                   onKeyDown={handleKeywordKeyDown}
+                  disabled={usePrompt}
                 />
-                <Button type="button" variant="outline" onClick={addKeyword}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addKeyword}
+                  disabled={usePrompt}
+                >
                   Add
                 </Button>
               </div>
-              {keywords.length > 0 && (
+              {keywords.length > 0 && !usePrompt && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {keywords.map((keyword) => (
                     <Badge
@@ -249,6 +316,21 @@ export function WatcherFormDialog({
 
             <div className="space-y-4">
               <Label>Notifications</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="intervalDays">Notification interval (days)</Label>
+                <Input
+                  id="intervalDays"
+                  type="number"
+                  min={1}
+                  value={intervalDays}
+                  onChange={(e) =>
+                    setIntervalDays(Math.max(1, Number(e.target.value) || 1))
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum once per day to save tokens
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">Email Notifications</p>
@@ -282,7 +364,13 @@ export function WatcherFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !name || keywords.length === 0}>
+            <Button
+              type="submit"
+              disabled={
+                loading ||
+                (usePrompt ? !prompt.trim() : !name || keywords.length === 0)
+              }
+            >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -75,6 +75,7 @@ export default function EditWatcherPage({
   const [sourceUrl, setSourceUrl] = useState("")
   const [notifyEmail, setNotifyEmail] = useState(true)
   const [notifySms, setNotifySms] = useState(false)
+  const [intervalDays, setIntervalDays] = useState(1)
   const [isActive, setIsActive] = useState(true)
 
   useEffect(() => {
@@ -85,8 +86,14 @@ export default function EditWatcherPage({
         setCategory(watcher.category)
         setKeywords(watcher.keywords || [])
         setSourceUrl(watcher.source_url || "")
-        setNotifyEmail(watcher.notify_email)
-        setNotifySms(watcher.notify_sms)
+        setNotifyEmail(watcher.notification_email)
+        setNotifySms(watcher.notification_push)
+        setIntervalDays(
+          Math.max(
+            1,
+            Math.round((watcher.notification_interval_minutes ?? 1440) / 1440),
+          ),
+        )
         setIsActive(watcher.is_active)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load watcher")
@@ -131,11 +138,17 @@ export default function EditWatcherPage({
         sourceUrl: sourceUrl || undefined,
         notifyEmail,
         notifySms,
+        notificationIntervalMinutes: Math.max(1, intervalDays) * 1440,
         isActive,
       })
 
-      router.push("/dashboard/watchers")
+      router.replace("/dashboard/watchers")
       router.refresh()
+      setTimeout(() => {
+        if (window.location.pathname.includes("/dashboard/watchers/")) {
+          window.location.assign("/dashboard/watchers")
+        }
+      }, 300)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -353,6 +366,21 @@ export default function EditWatcherPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="intervalDays">Notification interval (days)</Label>
+                <Input
+                  id="intervalDays"
+                  type="number"
+                  min={1}
+                  value={intervalDays}
+                  onChange={(e) =>
+                    setIntervalDays(Math.max(1, Number(e.target.value) || 1))
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum once per day to save tokens
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Email Notifications</p>
